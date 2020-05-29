@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Solution
 {
     public class Quote
