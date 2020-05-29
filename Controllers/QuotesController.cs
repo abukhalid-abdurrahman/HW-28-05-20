@@ -36,12 +36,14 @@ namespace Solution
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quote>>> Get()
         {
+            DataManager.OldQuoteRemover(dbContext);
             return await dbContext.Quotes.ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Quote>> Get(int id)
         {
+            DataManager.OldQuoteRemover(dbContext);
             Quote quote = await dbContext.Quotes.FirstOrDefaultAsync(x => x.Id == id);
             if (quote == null)
                 return NotFound();
@@ -51,6 +53,7 @@ namespace Solution
         [HttpPost]
         public async Task<ActionResult<Quote>> Post(Quote quote)
         {
+            DataManager.OldQuoteRemover(dbContext);
             if (quote == null)
             {
                 return BadRequest();
@@ -63,6 +66,7 @@ namespace Solution
         [HttpPut]
         public async Task<ActionResult<Quote>> Put(Quote quote)
         {
+            DataManager.OldQuoteRemover(dbContext);
             if (String.IsNullOrEmpty(quote.Text))
                 ModelState.AddModelError("Text", "Заполните текст цитаты! Текст не должен быть пустым!");
             if (!Validator.IsDate(quote.InsertDate.ToShortDateString()))
@@ -79,6 +83,7 @@ namespace Solution
         [HttpDelete("{id}")]
         public async Task<ActionResult<Quote>> Delete(int id)
         {
+            DataManager.OldQuoteRemover(dbContext);
             Quote quote = dbContext.Quotes.FirstOrDefault(x => x.Id == id);
             if (quote == null)
                 return NotFound();
