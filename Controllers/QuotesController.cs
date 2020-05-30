@@ -20,9 +20,9 @@ namespace Solution
                 dbContext.Quotes.Add(new Quote { Text = "Сильный человек — это тот, кто может управлять своим гневом.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
                 dbContext.Quotes.Add(new Quote { Text = "Почитает женщину только благородный, а унижает её — только подлец!", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
                 dbContext.Quotes.Add(new Quote { Text = "Не войдет в рай тот, кто оставит родителей в старости.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
-                dbContext.Quotes.Add(new Quote { Text = "Каждый человек ошибается, но достоин похвалы тот из вас, кто, осознав свою ошибку, пытается её исправить.", Author = "Мухаммед (С.В.С)",InsertDate =  System.DateTime.Now });
-                dbContext.Quotes.Add(new Quote { Text = "Самая совершенная вера у того, кто самый благонравный и самый добрый к свой семье.", Author = "Мухаммед (С.В.С)",InsertDate =  System.DateTime.Now });
-                dbContext.Quotes.Add(new Quote { Text = "Истинно верующий подобен пчеле: он не потребляет ничего, кроме благого, и не отдаёт ничего, кроме благого.", Author = "Мухаммед (С.В.С)",InsertDate = System.DateTime.Now });
+                dbContext.Quotes.Add(new Quote { Text = "Каждый человек ошибается, но достоин похвалы тот из вас, кто, осознав свою ошибку, пытается её исправить.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
+                dbContext.Quotes.Add(new Quote { Text = "Самая совершенная вера у того, кто самый благонравный и самый добрый к свой семье.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
+                dbContext.Quotes.Add(new Quote { Text = "Истинно верующий подобен пчеле: он не потребляет ничего, кроме благого, и не отдаёт ничего, кроме благого.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
                 dbContext.Quotes.Add(new Quote { Text = "Чернила ученого более святы, чем кровь мученика. Так учитесь же грамоте, а научившись, учите других.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
                 dbContext.Quotes.Add(new Quote { Text = "Аллах помогает Своему рабу до тех пор, пока этот раб будет помогать своему брату.", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
                 dbContext.Quotes.Add(new Quote { Text = "Не будет помилован тот, кто сам не проявляет милосердия (к другим)!", Author = "Мухаммед (С.В.С)", InsertDate = System.DateTime.Now });
@@ -63,21 +63,31 @@ namespace Solution
             return Ok(quote);
         }
 
-        [HttpPut]
-        public async Task<ActionResult<Quote>> Put(Quote quote)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Quote>> Put(Quote quote, int id)
         {
             DataManager.OldQuoteRemover(dbContext);
-            if (String.IsNullOrEmpty(quote.Text))
-                ModelState.AddModelError("Text", "Заполните текст цитаты! Текст не должен быть пустым!");
-            if (!Validator.IsDate(quote.InsertDate.ToShortDateString()))
-                ModelState.AddModelError("InsertDate", "Заполните дату, учитывая формат: dd/MM/yyyy, yyyy-MM-dd, dd.MM.yyyy");
-            
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (String.IsNullOrEmpty(quote.Text))
+                    ModelState.AddModelError("Text", "Заполните текст цитаты! Текст не должен быть пустым!");
+                if (!Validator.IsDate(quote.InsertDate.ToShortDateString()))
+                    ModelState.AddModelError("InsertDate", "Заполните дату, учитывая формат: dd/MM/yyyy, yyyy-MM-dd, dd.MM.yyyy");
 
-            dbContext.Quotes.Add(quote);
-            await dbContext.SaveChangesAsync();
-            return Ok(quote);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+                
+                var selectedQuote = await dbContext.Quotes.FirstAsync(elem => elem.Id == id);
+                selectedQuote.Text = quote.Text;
+                selectedQuote.Author = quote.Author;
+                selectedQuote.InsertDate = quote.InsertDate;
+                await dbContext.SaveChangesAsync();
+                return Ok(quote);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpDelete("{id}")]
